@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bokstavering - FRO Träningsspel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1A2C4B;
+    --navy-light: #3A4861;
+    --navy-dark: #0f1d33;
+    --yellow: #FCCA03;
+    --yellow-hover: #e5b800;
+    --gray-light: #F4F4F4;
+    --gray-mid: #D0D5D2;
+    --white: #FFFFFF;
+    --text: #333333;
+    --correct: #2e7d32;
+    --correct-bg: #e8f5e9;
+    --wrong: #c62828;
+    --wrong-bg: #ffebee;
+    --font-heading: 'Anton', sans-serif;
+    --font-body: 'Source Sans 3', -apple-system, system-ui, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--gray-light);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: var(--navy);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    position: relative;
+    z-index: 10;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .logo-text {
+    font-family: var(--font-heading);
+    color: var(--white);
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .logo-text span {
+    color: var(--yellow);
+  }
+
+  .lang-toggle {
+    display: flex;
+    gap: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 2px solid var(--yellow);
+  }
+
+  .lang-btn {
+    background: transparent;
+    color: var(--yellow);
+    border: none;
+    padding: 0.4rem 1rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+
+  .lang-btn.active {
+    background: var(--yellow);
+    color: var(--navy);
+  }
+
+  .lang-btn:hover:not(.active) {
+    background: rgba(252, 202, 3, 0.15);
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+    max-width: 600px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: var(--navy);
+    padding: 1.5rem 2rem;
+    position: relative;
+  }
+
+  .card-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--yellow);
+  }
+
+  .card-header h2 {
+    font-family: var(--font-heading);
+    color: var(--white);
+    font-size: 1.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .card-body {
+    padding: 2rem;
+  }
+
+  /* Start screen */
+  .start-screen .card-body {
+    text-align: center;
+  }
+
+  .start-screen .description {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    color: var(--navy-light);
+  }
+
+  .btn-primary {
+    display: inline-block;
+    background: var(--yellow);
+    color: var(--navy);
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.9rem 2.5rem;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 3px 12px rgba(252, 202, 3, 0.4);
+  }
+
+  .btn-primary:hover {
+    background: var(--yellow-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(252, 202, 3, 0.5);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  /* Game screen */
+  .progress-bar-container {
+    background: var(--navy);
+    padding: 0.75rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    position: relative;
+  }
+
+  .progress-bar-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--navy-light);
+  }
+
+  .progress-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background: var(--yellow);
+    transition: width 0.4s ease;
+    z-index: 1;
+  }
+
+  .stop-btn {
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.6);
+    width: 2rem;
+    height: 2rem;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .stop-btn:hover {
+    border-color: var(--wrong);
+    color: var(--wrong);
+    background: rgba(198,40,40,0.15);
+  }
+
+  .progress-text {
+    font-weight: 700;
+    color: var(--yellow);
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
+  .timer-text {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .question-area {
+    padding: 2.5rem 2rem 1.5rem;
+    text-align: center;
+  }
+
+  .question-prompt {
+    font-size: 0.9rem;
+    color: var(--navy-light);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+  }
+
+  .question-char {
+    font-family: var(--font-heading);
+    font-size: 4rem;
+    color: var(--navy);
+    line-height: 1.1;
+    margin-bottom: 0.25rem;
+  }
+
+  .options {
+    padding: 0 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .option-btn {
+    display: block;
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    background: var(--gray-light);
+    border: 2px solid transparent;
+    border-radius: 6px;
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--navy);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--navy);
+    background: var(--white);
+    transform: translateX(4px);
+  }
+
+  .option-btn:disabled {
+    cursor: default;
+  }
+
+  .option-btn.correct {
+    background: var(--correct-bg);
+    border-color: var(--correct);
+    color: var(--correct);
+  }
+
+  .option-btn.wrong {
+    background: var(--wrong-bg);
+    border-color: var(--wrong);
+    color: var(--wrong);
+  }
+
+  .option-btn.dimmed {
+    opacity: 0.4;
+  }
+
+  /* Results screen */
+  .results-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .score-display {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    color: var(--navy);
+    line-height: 1;
+  }
+
+  .score-display span {
+    font-size: 1.5rem;
+    color: var(--navy-light);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-box {
+    background: var(--gray-light);
+    border-radius: 6px;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--navy);
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--navy-light);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.15rem;
+  }
+
+  .errors-section {
+    margin-bottom: 2rem;
+  }
+
+  .errors-title {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    text-transform: uppercase;
+    color: var(--wrong);
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.03em;
+  }
+
+  .error-row {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--gray-light);
+    gap: 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .error-row:last-child {
+    border-bottom: none;
+  }
+
+  .error-char {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    color: var(--navy);
+    width: 2.5rem;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .error-details {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .error-your {
+    color: var(--wrong);
+    text-decoration: line-through;
+    font-weight: 600;
+  }
+
+  .error-correct {
+    color: var(--correct);
+    font-weight: 700;
+  }
+
+  .error-arrow {
+    color: var(--gray-mid);
+    margin: 0 0.3rem;
+  }
+
+  .results-actions {
+    text-align: center;
+  }
+
+  /* Morse code decoration */
+  .morse-strip {
+    background: var(--navy-dark);
+    padding: 0.4rem 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .morse-text {
+    display: inline-block;
+    font-family: monospace;
+    color: rgba(252, 202, 3, 0.25);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    animation: scroll-morse 30s linear infinite;
+  }
+
+  @keyframes scroll-morse {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  footer {
+    background: var(--navy);
+    padding: 1rem 2rem;
+    text-align: center;
+  }
+
+  footer a {
+    color: var(--yellow);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
+  }
+
+  footer a:hover {
+    text-decoration: underline;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Answer feedback animation */
+  @keyframes flash-correct {
+    0% { box-shadow: 0 0 0 0 rgba(46,125,50,0.4); }
+    100% { box-shadow: 0 0 0 12px rgba(46,125,50,0); }
+  }
+  @keyframes flash-wrong {
+    0% { box-shadow: 0 0 0 0 rgba(198,40,40,0.4); }
+    100% { box-shadow: 0 0 0 12px rgba(198,40,40,0); }
+  }
+  .option-btn.correct { animation: flash-correct 0.4s ease-out; }
+  .option-btn.wrong { animation: flash-wrong 0.4s ease-out; }
+
+  /* Start screen */
+  .start-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-secondary {
+    display: inline-block;
+    background: transparent;
+    color: var(--navy);
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.8rem 2rem;
+    border: 2px solid var(--navy-light);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--navy);
+    background: var(--gray-light);
+  }
+
+  .game-type-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .game-type-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.85rem 1rem;
+    background: var(--gray-light);
+    border: 2px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    font-family: var(--font-body);
+  }
+
+  .game-type-btn:hover {
+    border-color: var(--navy-light);
+    background: var(--white);
+  }
+
+  .game-type-btn.selected {
+    border-color: var(--navy);
+    background: var(--white);
+    box-shadow: 0 0 0 1px var(--navy);
+  }
+
+  .game-type-icon {
+    font-size: 1.3rem;
+    width: 2rem;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .game-type-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .game-type-name {
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 0.95rem;
+  }
+
+  .game-type-detail {
+    font-size: 0.8rem;
+    color: var(--navy-light);
+    margin-top: 0.1rem;
+  }
+
+  .mode-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .mode-toggle {
+    display: flex;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 2px solid var(--navy-light);
+  }
+
+  .mode-btn {
+    background: transparent;
+    color: var(--navy);
+    border: none;
+    padding: 0.4rem 1rem;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .mode-btn.active {
+    background: var(--navy);
+    color: var(--white);
+  }
+
+  .mode-btn:hover:not(.active) {
+    background: rgba(26, 44, 75, 0.08);
+  }
+
+  .mode-label {
+    font-size: 0.85rem;
+    color: var(--navy-light);
+    font-weight: 600;
+  }
+
+  /* Cheatsheet */
+  .cheat-card {
+    max-width: 700px;
+  }
+
+  .cheat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cheat-header .stop-btn {
+    position: relative;
+  }
+
+  .cheat-body {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .cheat-section-title {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    text-transform: uppercase;
+    color: var(--navy);
+    letter-spacing: 0.03em;
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  .cheat-section-title:first-child {
+    margin-top: 0;
+  }
+
+  .cheat-table {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: 0;
+    border: 1px solid var(--gray-mid);
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: 0.95rem;
+  }
+
+  .cheat-row {
+    display: contents;
+  }
+
+  .cheat-row:nth-child(even) .cheat-char,
+  .cheat-row:nth-child(even) .cheat-word {
+    background: var(--gray-light);
+  }
+
+  .cheat-char {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    color: var(--navy);
+    padding: 0.4rem 0.6rem;
+    text-align: center;
+    border-right: 1px solid var(--gray-mid);
+  }
+
+  .cheat-word {
+    padding: 0.4rem 0.8rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 0.75rem 1rem; }
+    .logo-text { font-size: 1.2rem; }
+    main { padding: 1rem; }
+    .question-char { font-size: 3rem; }
+    .card-body { padding: 1.5rem; }
+    .question-area { padding: 2rem 1.5rem 1rem; }
+    .options { padding: 0 1.5rem 1.5rem; }
+    .stats-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-text"><span>FRO</span> Bokstavering</div>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" data-lang="sv" onclick="setLang('sv')">SV</button>
+    <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+  </div>
+</header>
+
+<div class="morse-strip">
+  <span class="morse-text">..-. .-. --- .-.-.- ... . &nbsp;&nbsp; ..-. .-. --- .-.-.- ... . &nbsp;&nbsp; ..-. .-. --- .-.-.- ... . &nbsp;&nbsp; ..-. .-. --- .-.-.- ... . &nbsp;&nbsp; ..-. .-. --- .-.-.- ... . &nbsp;&nbsp; ..-. .-. --- .-.-.- ... . &nbsp;&nbsp; ..-. .-. --- .-.-.- ... . &nbsp;&nbsp; ..-. .-. --- .-.-.- ... . &nbsp;&nbsp; ..-. .-. --- .-.-.- ... . &nbsp;&nbsp; ..-. .-. --- .-.-.- ... . &nbsp;&nbsp; ..-. .-. --- .-.-.- ... . &nbsp;&nbsp; ..-. .-. --- .-.-.- ... . &nbsp;&nbsp;</span>
+</div>
+
+<main>
+  <!-- START SCREEN -->
+  <div id="start-screen" class="screen active">
+    <div class="card start-screen">
+      <div class="card-header">
+        <h2 id="start-title">Testa din bokstavering</h2>
+      </div>
+      <div class="card-body">
+        <p class="description" id="start-desc">
+          Välj typ av spel och testa dina kunskaper i bokstavering.
+        </p>
+
+        <div class="game-type-grid" id="game-type-grid">
+          <button class="game-type-btn selected" data-type="mixed" onclick="selectGameType('mixed')">
+            <span class="game-type-icon">Aa1#</span>
+            <div class="game-type-info">
+              <div class="game-type-name" id="type-mixed-name">Blandat</div>
+              <div class="game-type-detail" id="type-mixed-detail">Bokstäver, siffror &amp; skiljetecken</div>
+            </div>
+          </button>
+          <button class="game-type-btn" data-type="alphabet" onclick="selectGameType('alphabet')">
+            <span class="game-type-icon">Abc</span>
+            <div class="game-type-info">
+              <div class="game-type-name" id="type-alpha-name">Alfabet</div>
+              <div class="game-type-detail" id="type-alpha-detail">Bara bokstäver (A&ndash;Ö)</div>
+            </div>
+          </button>
+          <button class="game-type-btn" data-type="numspunct" onclick="selectGameType('numspunct')">
+            <span class="game-type-icon">1.#%</span>
+            <div class="game-type-info">
+              <div class="game-type-name" id="type-nump-name">Siffror &amp; tecken</div>
+              <div class="game-type-detail" id="type-nump-detail">Siffror &amp; skiljetecken</div>
+            </div>
+          </button>
+        </div>
+
+        <div class="mode-toggle-row">
+          <span class="mode-label" id="mode-label">Antal:</span>
+          <div class="mode-toggle">
+            <button class="mode-btn" data-mode="limited" onclick="selectMode('limited')" id="mode-limited-btn">30</button>
+            <button class="mode-btn active" data-mode="all" onclick="selectMode('all')" id="mode-all-btn">Alla (59)</button>
+          </div>
+        </div>
+
+        <div class="start-actions">
+          <button class="btn-primary" onclick="startGame()" id="start-btn">Starta</button>
+          <button class="btn-secondary" onclick="showCheatsheet()" id="cheat-btn">Facit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHEATSHEET SCREEN -->
+  <div id="cheat-screen" class="screen">
+    <div class="card cheat-card">
+      <div class="card-header cheat-header">
+        <h2 id="cheat-title">Facit</h2>
+        <button class="stop-btn" onclick="showScreen('start-screen')" title="Stäng">&times;</button>
+      </div>
+      <div class="card-body cheat-body">
+        <h3 class="cheat-section-title" id="cheat-letters-title">Bokstäver</h3>
+        <div class="cheat-table" id="cheat-letters"></div>
+        <h3 class="cheat-section-title" id="cheat-digits-title">Siffror</h3>
+        <div class="cheat-table" id="cheat-digits"></div>
+        <h3 class="cheat-section-title" id="cheat-punct-title">Skiljetecken</h3>
+        <div class="cheat-table" id="cheat-punct"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="card">
+      <div class="progress-bar-container">
+        <span class="progress-text" id="progress-text">1 / 30</span>
+        <span class="timer-text" id="timer-text">0:00</span>
+        <button class="stop-btn" onclick="abandonGame()" id="stop-btn" title="Avbryt">&times;</button>
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="question-area">
+        <div class="question-prompt" id="q-prompt">Vad är korrekt bokstavering för</div>
+        <div class="question-char" id="q-char">A</div>
+      </div>
+      <div class="options" id="options-container"></div>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="results-screen" class="screen">
+    <div class="card">
+      <div class="card-header">
+        <h2 id="results-title">Resultat</h2>
+      </div>
+      <div class="card-body">
+        <div class="results-header">
+          <div class="score-display" id="score-display">28 <span>/ 30</span></div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-value" id="stat-time">1:23</div>
+            <div class="stat-label" id="stat-time-label">Total tid</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="stat-avg">2.8s</div>
+            <div class="stat-label" id="stat-avg-label">Snitt per tecken</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="stat-correct">28</div>
+            <div class="stat-label" id="stat-correct-label">Rätt</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-value" id="stat-wrong">2</div>
+            <div class="stat-label" id="stat-wrong-label">Fel</div>
+          </div>
+        </div>
+        <div class="errors-section" id="errors-section" style="display:none">
+          <div class="errors-title" id="errors-title">Felaktiga svar</div>
+          <div id="errors-list"></div>
+        </div>
+        <div class="results-actions">
+          <button class="btn-primary" onclick="startGame()" id="restart-btn">Spela igen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <a href="https://www.fro.se" target="_blank" rel="noopener">fro.se</a>
+</footer>
+
+<script>
+// ============================================================
+// DATA - All spelling data from FRO reference card
+// ============================================================
+const DATA = {
+  letters: {
+    'A': { sv: 'ADAM', en: 'ALFA' },
+    'B': { sv: 'BERTIL', en: 'BRAVO' },
+    'C': { sv: 'CESAR', en: 'CHARLIE' },
+    'D': { sv: 'DAVID', en: 'DELTA' },
+    'E': { sv: 'ERIK', en: 'ECHO' },
+    'F': { sv: 'FILIP', en: 'FOXTROT' },
+    'G': { sv: 'GUSTAV', en: 'GOLF' },
+    'H': { sv: 'HELGE', en: 'HOTEL' },
+    'I': { sv: 'IVAR', en: 'INDIA' },
+    'J': { sv: 'JOHAN', en: 'JULIET' },
+    'K': { sv: 'KALLE', en: 'KILO' },
+    'L': { sv: 'LUDVIG', en: 'LIMA' },
+    'M': { sv: 'MARTIN', en: 'MIKE' },
+    'N': { sv: 'NIKLAS', en: 'NOVEMBER' },
+    'O': { sv: 'OLOF', en: 'OSCAR' },
+    'P': { sv: 'PETTER', en: 'PAPA' },
+    'Q': { sv: 'QVINTUS', en: 'QUEBEC' },
+    'R': { sv: 'RUDOLF', en: 'ROMEO' },
+    'S': { sv: 'SIGURD', en: 'SIERRA' },
+    'T': { sv: 'TORE', en: 'TANGO' },
+    'U': { sv: 'URBAN', en: 'UNIFORM' },
+    'V': { sv: 'VIKTOR', en: 'VICTOR' },
+    'W': { sv: 'WILHELM', en: 'WISKEY' },
+    'X': { sv: 'XERXES', en: 'X-RAY' },
+    'Y': { sv: 'YNGVE', en: 'YANKEE' },
+    'Z': { sv: 'ZÄTA', en: 'ZULU' },
+    'Å': { sv: 'ÅKE', en: 'ALFA-ALFA' },
+    'Ä': { sv: 'ÄRLIG', en: 'ALFA-ECHO' },
+    'Ö': { sv: 'ÖSTEN', en: 'OSCAR-ECHO' },
+    'Ü': { sv: 'ÜBEL', en: 'UNIFORM-ECHO' },
+  },
+  digits: {
+    '0': { sv: 'NOLLA', en: 'ZERO' },
+    '1': { sv: 'ETT', en: 'ONE' },
+    '2': { sv: 'TVÅA', en: 'TWO' },
+    '3': { sv: 'TREA', en: 'THREE' },
+    '4': { sv: 'FYRA', en: 'FOUR' },
+    '5': { sv: 'FEMMA', en: 'FIVE' },
+    '6': { sv: 'SEXA', en: 'SIX' },
+    '7': { sv: 'SJU', en: 'SEVEN' },
+    '8': { sv: 'ÅTTA', en: 'EIGHT' },
+    '9': { sv: 'NIA', en: 'NINE' },
+  },
+  punctuation: {
+    '.': { sv: 'PUNKT', en: 'FULL STOP', label: { sv: 'Punkt', en: 'Full Stop' } },
+    ',': { sv: 'KOMMA', en: 'COMMA', label: { sv: 'Komma', en: 'Comma' } },
+    '/': { sv: 'BRÅKSTRECK', en: 'SLANT', label: { sv: 'Snedstreck', en: 'Slash' } },
+    '-': { sv: 'BINDESTRECK', en: 'HYPHEN', label: { sv: 'Bindestreck', en: 'Hyphen' } },
+    '?': { sv: 'FRÅGETECKEN', en: 'QUESTION MARK', label: { sv: 'Frågetecken', en: 'Question Mark' } },
+    '"': { sv: 'ANFÖRINGSTECKEN', en: 'QUOTE', label: { sv: 'Citattecken', en: 'Quote' } },
+    '=': { sv: 'LIKA MED', en: 'EQUAL SIGN', label: { sv: 'Lika med', en: 'Equal Sign' } },
+    '(': { sv: 'VÄNSTERPARENTES', en: 'BRACKETS ON', label: { sv: 'Vänsterparentes', en: 'Left Bracket' } },
+    ')': { sv: 'HÖGERPARENTES', en: 'BRACKETS OFF', label: { sv: 'Högerparentes', en: 'Right Bracket' } },
+    ':': { sv: 'KOLON', en: 'COLON', label: { sv: 'Kolon', en: 'Colon' } },
+    ';': { sv: 'SEMIKOLON', en: 'SEMI-COLON', label: { sv: 'Semikolon', en: 'Semicolon' } },
+    '+': { sv: 'PLUSTECKEN', en: 'PLUS SIGN', label: { sv: 'Plustecken', en: 'Plus Sign' } },
+    '#': { sv: 'BRÄDGÅRD', en: 'HASH', label: { sv: 'Brädgård', en: 'Hash' } },
+    '*': { sv: 'STJÄRNA', en: 'ASTERISK', label: { sv: 'Stjärna', en: 'Asterisk' } },
+    '§': { sv: 'PARAGRAF', en: 'SECTOR SIGN', label: { sv: 'Paragraf', en: 'Section Sign' } },
+    '%': { sv: 'PROCENT', en: 'PERCENT SIGN', label: { sv: 'Procent', en: 'Percent' } },
+    '>': { sv: 'STÖRRE ÄN', en: 'RIGHT ANGLE BRACKET', label: { sv: 'Större än', en: 'Greater Than' } },
+    '<': { sv: 'MINDRE ÄN', en: 'LEFT ANGLE BRACKET', label: { sv: 'Mindre än', en: 'Less Than' } },
+    '@': { sv: 'SNABEL-A', en: 'AT SIGN', label: { sv: 'Snabel-a', en: 'At Sign' } },
+  },
+};
+
+// ============================================================
+// DISTRACTORS - Plausible wrong answers per category
+// ============================================================
+const DISTRACTORS = {
+  letters: {
+    sv: {
+      'A': ['ANDERS', 'ANTON', 'ALFRED', 'ALBIN', 'ALGOT', 'ARVID'],
+      'B': ['BRUNO', 'BIRGER', 'BENGT', 'BÖRJE', 'BROR', 'BILLY'],
+      'C': ['CARL', 'CLAES', 'CONNY', 'CHRISTER', 'CURT', 'CASPER'],
+      'D': ['DANIEL', 'DAGNY', 'DIDRIK', 'DUNDER', 'DORIS', 'DENNIS'],
+      'E': ['ERNST', 'EDVIN', 'EVERT', 'ELIAS', 'ESKIL', 'ENAR'],
+      'F': ['FREDRIK', 'FOLKE', 'FRANK', 'FRITZ', 'FANNY', 'FABIAN'],
+      'G': ['GUNNAR', 'GÖSTA', 'GILLIS', 'GREGER', 'GRETA', 'GÖRAN'],
+      'H': ['HENRIK', 'HJALMAR', 'HUGO', 'HARRY', 'HANS', 'HOLGER'],
+      'I': ['INGVAR', 'ISAK', 'INGE', 'IVAN', 'IRIS', 'IGOR'],
+      'J': ['JAKOB', 'JÖRGEN', 'JONAS', 'JULIUS', 'JENNY', 'JESPER'],
+      'K': ['KARL', 'KURT', 'KONRAD', 'KLARA', 'KRISTER', 'KNUD'],
+      'L': ['LARS', 'LENNART', 'LEIF', 'LOTTA', 'LINUS', 'LAGE'],
+      'M': ['MAGNUS', 'MIKAEL', 'MORGAN', 'MATS', 'MELKER', 'MAJA'],
+      'N': ['NILS', 'NORE', 'NORDPOL', 'NANCY', 'NORBERT', 'NISSE'],
+      'O': ['OSKAR', 'OTTO', 'OLLE', 'ORVAR', 'OSSIAN', 'OLIVER'],
+      'P': ['PAUL', 'PONTUS', 'PETER', 'PATRIK', 'PERCY', 'PELLE'],
+      'Q': ['QUINTETT', 'QUIST', 'QUIRINUS', 'QUINLAN', 'QUENTIN', 'QUADRAT'],
+      'R': ['RAGNAR', 'RICKARD', 'ROBERT', 'ROLAND', 'RUBEN', 'RUNE'],
+      'S': ['STURE', 'SIXTEN', 'SVEN', 'SAMUEL', 'STELLA', 'STEFAN'],
+      'T': ['THOMAS', 'TEODOR', 'TRYGGVE', 'TURE', 'TORSTEN', 'TOMMY'],
+      'U': ['ULLA', 'ULRIK', 'UNGE', 'UFFE', 'UMBRA', 'UNDIS'],
+      'V': ['VERA', 'VILHELM', 'VALTER', 'VILLE', 'VIGGO', 'VERNER'],
+      'W': ['WILLY', 'WERNER', 'WALDEMAR', 'WENDELA', 'WIKTOR', 'WALTER'],
+      'X': ['XANDER', 'XENON', 'XYLOFON', 'XENA', 'XAVIER', 'XIMON'],
+      'Y': ['YMER', 'YVONNE', 'YLVA', 'YORK', 'YSTAD', 'YLLE'],
+      'Z': ['ZEBRA', 'ZELDA', 'ZORRO', 'ZACK', 'ZENITH', 'ZIGGE'],
+      'Å': {'correct': 'ÅKE', 'pool': ['ÅLBORG', 'ÅBERG', 'ÅSMUND', 'ÅNGSTRÖM', 'ÅLAND', 'ÅGREN']},
+      'Ä': {'correct': 'ÄRLIG', 'pool': ['ÄNGEL', 'ÄPPLE', 'ÄMNE', 'ÄRENDE', 'ÄLVA', 'ÄRTA']},
+      'Ö': {'correct': 'ÖSTEN', 'pool': ['ÖBERG', 'ÖLAND', 'ÖDMJUK', 'ÖGON', 'ÖVRIG', 'ÖPPNA']},
+      'Ü': {'correct': 'ÜBEL', 'pool': ['ÜBER', 'ÜBUNG', 'ÜLRIK', 'ÜBLICH', 'ÜNGE', 'ÜPPIG']},
+    },
+    en: {
+      'A': ['APPLE', 'ALPHA', 'ADAM', 'ANCHOR', 'ANGEL', 'ARCTIC'],
+      'B': ['BAKER', 'BETA', 'BOSTON', 'BRAVO-TWO', 'BISHOP', 'BUFFALO'],
+      'C': ['COBRA', 'CASTLE', 'CAPTAIN', 'CHERRY', 'CHESS', 'CROSS'],
+      'D': ['DOG', 'DAVID', 'DANGER', 'DIAMOND', 'DRUMMER', 'DAGGER'],
+      'E': ['EAGLE', 'EDWARD', 'EMPIRE', 'EPSILON', 'EMBER', 'ENVOY'],
+      'F': ['FOX', 'FREDDIE', 'FALCON', 'FLAME', 'FOREST', 'FIDDLE'],
+      'G': ['GAMMA', 'GEORGE', 'GRIZZLY', 'GARDEN', 'GLOBE', 'GRANITE'],
+      'H': ['HENRY', 'HAVOC', 'HARBOR', 'HORIZON', 'HAMMER', 'HALO'],
+      'I': ['ISLAND', 'ITEM', 'IGLOO', 'IVORY', 'IRON', 'IMPORT'],
+      'J': ['JACKET', 'JESTER', 'JUNGLE', 'JUPITER', 'JUSTICE', 'JEWEL'],
+      'K': ['KING', 'KNIGHT', 'KARMA', 'KEYSTONE', 'KOALA', 'KETTLE'],
+      'L': ['LONDON', 'LAMBDA', 'LEMON', 'LIBERTY', 'LOTUS', 'LANCE'],
+      'M': ['METRO', 'MANGO', 'MOTHER', 'MISSION', 'MARBLE', 'MAJOR'],
+      'N': ['NANCY', 'NEPTUNE', 'NOBLE', 'NORTH', 'NIMBUS', 'NOVA'],
+      'O': ['OMEGA', 'ORANGE', 'ORCHID', 'OLIVER', 'OUTPOST', 'ORBIT'],
+      'P': ['PETER', 'PANDA', 'PARROT', 'PATROL', 'PRIME', 'PILOT'],
+      'Q': ['QUEEN', 'QUARTZ', 'QUEST', 'QUAIL', 'QUANTUM', 'QUINCY'],
+      'R': ['ROGER', 'RAVEN', 'RANGER', 'ROCKET', 'RUBY', 'RIVER'],
+      'S': ['SUGAR', 'SNAKE', 'SUMMIT', 'SILVER', 'SPARROW', 'STONE'],
+      'T': ['TIGER', 'THUNDER', 'TURTLE', 'TEMPLE', 'TOWER', 'TIMBER'],
+      'U': ['UNCLE', 'ULTRA', 'UNITY', 'UMBRELLA', 'UNION', 'URBAN'],
+      'V': ['VENUS', 'VIPER', 'VOYAGE', 'VALOR', 'VAULT', 'VECTOR'],
+      'W': ['WHISKEY', 'WALRUS', 'WOLF', 'WIZARD', 'WINTER', 'WARRANT'],
+      'X': ['XENON', 'XEROX', 'XANDER', 'XMAS', 'XPRESS', 'XYLEM'],
+      'Y': ['YELLOW', 'YONDER', 'YEOMAN', 'YUCCA', 'YOGURT', 'YOKE'],
+      'Z': ['ZEBRA', 'ZERO', 'ZENITH', 'ZINC', 'ZODIAC', 'ZIPPER'],
+      'Å': {'correct': 'ALFA-ALFA', 'pool': ['ALFA-ECHO', 'ALFA-OSCAR', 'ALFA-INDIA', 'DOUBLE ALFA', 'ALFA-BRAVO', 'ALFA-LIMA']},
+      'Ä': {'correct': 'ALFA-ECHO', 'pool': ['ALFA-ALFA', 'ALFA-OSCAR', 'ECHO-ALFA', 'ALFA-INDIA', 'ALFA-DELTA', 'ALFA-MIKE']},
+      'Ö': {'correct': 'OSCAR-ECHO', 'pool': ['OSCAR-ALFA', 'OSCAR-OSCAR', 'ECHO-OSCAR', 'OSCAR-INDIA', 'OSCAR-LIMA', 'OSCAR-MIKE']},
+      'Ü': {'correct': 'UNIFORM-ECHO', 'pool': ['UNIFORM-ALFA', 'UNIFORM-OSCAR', 'ECHO-UNIFORM', 'UNIFORM-INDIA', 'UNIFORM-BRAVO', 'UNIFORM-DELTA']},
+    }
+  },
+  digits: {
+    sv: {
+      '0': ['NOLL', 'NOLLAN', 'NULL', 'NOLLET', 'NÖLL', 'NOLLAS'],
+      '1': ['ETTA', 'ENNE', 'ENKEL', 'ENTAL', 'ENAS', 'ERSTE'],
+      '2': ['TVÅ', 'TVÅAN', 'DUBBEL', 'TVENNE', 'TVIA', 'TVÄR'],
+      '3': ['TRE', 'TREAN', 'TREDJE', 'TRETAL', 'TRIAS', 'TRISS'],
+      '4': ['FYRAN', 'FJÄRDE', 'FIRRA', 'FYRE', 'FJÄRD', 'FIRAL'],
+      '5': ['FEM', 'FEMMAN', 'FEMTE', 'FEMTAL', 'FEMRA', 'FIMMIA'],
+      '6': ['SEX', 'SEXAN', 'SJÄTTE', 'SEXTAL', 'SEXER', 'SETTA'],
+      '7': ['SJUA', 'SJUAN', 'SJUNDE', 'SJUTAL', 'SVIA', 'SETTE'],
+      '8': ['ÅTTAN', 'ÅTTONDE', 'ATTA', 'ÅTTAL', 'ÅTTIA', 'ETTA'],
+      '9': ['NIAN', 'NIONDE', 'NIRA', 'NITAL', 'NINTA', 'NIIA'],
+    },
+    en: {
+      '0': ['NIL', 'NULL', 'NAUGHT', 'ZILCH', 'NOUGHT', 'NADA'],
+      '1': ['WON', 'ONES', 'FIRST', 'SINGLE', 'ACE', 'UNO'],
+      '2': ['TOO', 'TWICE', 'DOUBLE', 'DEUCE', 'TWAIN', 'TWIG'],
+      '3': ['TREE', 'THIRD', 'TRIPLE', 'THRICE', 'TRIO', 'TREY'],
+      '4': ['FOR', 'FORTH', 'FORCE', 'FORD', 'FORE', 'FAWN'],
+      '5': ['FIFE', 'FIFTH', 'FIVER', 'HIVE', 'FINES', 'FIFTY'],
+      '6': ['SIX-ER', 'SIXTH', 'SIXER', 'STICKS', 'SIXTY', 'SITS'],
+      '7': ['SEVER', 'SEVENTH', 'HEAVEN', 'SERMON', 'SEVERAL', 'SEIZE'],
+      '8': ['ATE', 'EIGHTH', 'EIGHTY', 'ACES', 'AIGHT', 'GATE'],
+      '9': ['NINER', 'NINTH', 'DINE', 'VINE', 'NINETEEN', 'KNIGHT'],
+    }
+  },
+  punctuation: {
+    sv: {
+      '.': ['PRICK', 'STOPP', 'PRICKEN', 'PERIOD', 'PUNKTUM', 'SLUT'],
+      ',': ['KOMMATECKEN', 'SEMIKOLON', 'KOLON', 'SKILJETECKEN', 'KOMMANDO', 'KOMET'],
+      '/': ['SNEDSTRECK', 'STRECK', 'SLASCH', 'SKRÅSTRECK', 'BRÅK', 'DELSTRECK'],
+      '-': ['STRECK', 'MINUSTECKEN', 'TANKSTRECK', 'AVBROTT', 'BINDNING', 'MELLANSTRECK'],
+      '?': ['FRÅGANDE', 'FRÅGAN', 'FRÅGE', 'FRÅGNING', 'FRÅGIS', 'FUNDERARE'],
+      '"': ['CITATTECKEN', 'TALSTRECK', 'GÅSÖGON', 'APOSTROF', 'ANFÖRING', 'CITAT'],
+      '=': ['LIKHETSTECKEN', 'LIKHET', 'DUBBELT', 'EKVIVALENT', 'LIKASOM', 'JÄMLIKT'],
+      '(': ['PARENTES', 'KLAMMER', 'HALVBÅGE', 'VINKEL', 'BÖJD', 'HALVCIRKEL'],
+      ')': ['PARENTES', 'KLAMMER', 'HALVBÅGE', 'SLUTBÅGE', 'SLUTKLAMMER', 'AVSLUT'],
+      ':': ['DUBBELpunkt', 'KOLONTECKEN', 'DUBBELPRICK', 'KOLUMN', 'PRICKPAR', 'SEMIKOLON'],
+      ';': ['HALVKOLON', 'KOLON', 'KOMMAKOLON', 'PUNKTKOMMA', 'KOLONSEMI', 'SEMIPUNKT'],
+      '+': ['KORS', 'ADDERA', 'TILLÄGG', 'PLUSSA', 'ADDITION', 'PLUSSIGN'],
+      '#': ['STÄNGSEL', 'NUMMERTECKEN', 'RUTNÄT', 'GALLER', 'FYRKANT', 'STAKET'],
+      '*': ['ASTERISK', 'KRYSS', 'SNÖFLINGA', 'STRÅLE', 'STÄRNA', 'SPLATT'],
+      '§': ['STYCKE', 'LAGRUM', 'PARAGRAFEN', 'KAPITEL', 'KLAUSUL', 'PARAGRAFTECKEN'],
+      '%': ['PROMILLE', 'HUNDRATAL', 'PROCENTTAL', 'ANDEL', 'PROSENT', 'PERCENTO'],
+      '>': ['HÖGER', 'PILHÖGER', 'STORÄRRE', 'MER ÄN', 'FRAMÅT', 'ÖKANDE'],
+      '<': ['VÄNSTER', 'PILVÄNSTER', 'MINDREÄN', 'FÄRRE ÄN', 'BAKÅT', 'MINSKANDE'],
+      '@': ['KANELBULLE', 'ALFAKRULL', 'KRINGLA', 'SNABELA', 'KRULLALFA', 'APSVANS'],
+    },
+    en: {
+      '.': ['PERIOD', 'DOT', 'POINT', 'STOP', 'SPOT', 'FULLPOINT'],
+      ',': ['SEPARATOR', 'PAUSE', 'BREAK', 'SEMICOLON', 'DIVIDER', 'SPLICE'],
+      '/': ['SLASH', 'STROKE', 'DIVIDE', 'FORWARD', 'OBLIQUE', 'VIRGULE'],
+      '-': ['DASH', 'MINUS', 'STROKE', 'EN-DASH', 'LINE', 'SUBTRACT'],
+      '?': ['QUERY', 'INQUIRY', 'QUESTION', 'INTERROGATION', 'ASKING', 'WONDER'],
+      '"': ['QUOTATION', 'SPEECH MARK', 'INVERTED COMMA', 'DOUBLE TICK', 'CITATION', 'MARK'],
+      '=': ['EQUALS', 'BALANCE', 'SAME AS', 'EQUIVALENT', 'MATCH', 'EVEN'],
+      '(': ['OPEN PAREN', 'LEFT PAREN', 'OPEN BRACKET', 'LEFT CURVE', 'OPEN GROUP', 'START BRACKET'],
+      ')': ['CLOSE PAREN', 'RIGHT PAREN', 'CLOSE BRACKET', 'RIGHT CURVE', 'END GROUP', 'END BRACKET'],
+      ':': ['DOTS', 'RATIO', 'DOUBLE DOT', 'DIVIDER', 'SEPARATOR', 'SEMICOLON'],
+      ';': ['HALF COLON', 'SEMI STOP', 'DOT COMMA', 'PAUSE MARK', 'SEMI POINT', 'SEMI BREAK'],
+      '+': ['CROSS', 'ADD', 'ADDITION', 'POSITIVE', 'AND SIGN', 'SUM'],
+      '#': ['POUND', 'NUMBER SIGN', 'SHARP', 'GRID', 'HASHTAG', 'MESH'],
+      '*': ['STAR', 'WILDCARD', 'SPLAT', 'MARK', 'TWINKLE', 'POINTER'],
+      '§': ['SECTION', 'PARAGRAPH', 'CLAUSE', 'ARTICLE', 'SEGMENT', 'DIVISION'],
+      '%': ['PER CENT', 'RATIO', 'HUNDREDTH', 'PROPORTION', 'PERCENTAGE', 'PORTION'],
+      '>': ['GREATER THAN', 'MORE THAN', 'RIGHT ARROW', 'RIGHT ANGLE', 'FORWARD', 'BIGGER'],
+      '<': ['LESS THAN', 'SMALLER THAN', 'LEFT ARROW', 'LEFT ANGLE', 'BACKWARD', 'MINOR'],
+      '@': ['AT', 'AMPERSAT', 'AROBASE', 'COMMERCIAL AT', 'CIRCLE-A', 'ROUND-A'],
+    }
+  }
+};
+
+// ============================================================
+// UI TEXT
+// ============================================================
+const UI = {
+  sv: {
+    startTitle: 'Testa din bokstavering',
+    startDesc: 'Välj typ av spel och testa dina kunskaper i bokstavering.',
+    startBtn: 'Starta',
+    typeMixedName: 'Blandat',
+    typeMixedDetail: 'Bokstäver, siffror & skiljetecken',
+    typeAlphaName: 'Alfabet',
+    typeAlphaDetail: 'Bara bokstäver (A\u2013Ö)',
+    typeNumpName: 'Siffror & tecken',
+    typeNumpDetail: 'Siffror & skiljetecken',
+    modeLabel: 'Antal:',
+    modeAll: 'Alla',
+    modeLimited: '',
+    prompt: 'Vad är korrekt bokstavering för',
+    typeLetter: 'Bokstav',
+    typeDigit: 'Siffra',
+    typePunct: 'Skiljetecken',
+    resultsTitle: 'Resultat',
+    totalTime: 'Total tid',
+    avgTime: 'Snitt per tecken',
+    correct: 'Rätt',
+    wrong: 'Fel',
+    errorsTitle: 'Felaktiga svar',
+    restart: 'Spela igen',
+    stop: 'Avbryt',
+    cheatBtn: 'Facit',
+    cheatTitle: 'Facit',
+    cheatLetters: 'Bokstäver',
+    cheatDigits: 'Siffror',
+    cheatPunct: 'Skiljetecken',
+  },
+  en: {
+    startTitle: 'Test your spelling',
+    startDesc: 'Choose game type and test your spelling knowledge.',
+    startBtn: 'Start',
+    typeMixedName: 'Mixed',
+    typeMixedDetail: 'Letters, digits & punctuation',
+    typeAlphaName: 'Alphabet',
+    typeAlphaDetail: 'Letters only (A\u2013Ö)',
+    typeNumpName: 'Digits & symbols',
+    typeNumpDetail: 'Digits & punctuation',
+    modeLabel: 'Count:',
+    modeAll: 'All',
+    modeLimited: '',
+    prompt: 'What is the correct spelling for',
+    typeLetter: 'Letter',
+    typeDigit: 'Digit',
+    typePunct: 'Punctuation',
+    resultsTitle: 'Results',
+    totalTime: 'Total time',
+    avgTime: 'Avg per character',
+    correct: 'Correct',
+    wrong: 'Wrong',
+    errorsTitle: 'Incorrect answers',
+    restart: 'Play again',
+    stop: 'Abort',
+    cheatBtn: 'Cheatsheet',
+    cheatTitle: 'Cheatsheet',
+    cheatLetters: 'Letters',
+    cheatDigits: 'Digits',
+    cheatPunct: 'Punctuation',
+  }
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let lang = 'sv';
+let gameType = 'mixed'; // 'mixed', 'alphabet', 'numspunct'
+let gameMode = 'all';   // 'all', 'limited'
+let questions = [];
+let totalQuestions = 0;
+let currentQ = 0;
+let score = 0;
+let errors = [];
+let startTime = 0;
+let timerInterval = null;
+
+// Character counts per game type
+const COUNTS = {
+  mixed:     { all: 59, limited: 30 },
+  alphabet:  { all: 30, limited: 30 },
+  numspunct: { all: 29, limited: 15 },
+};
+
+// ============================================================
+// LANGUAGE
+// ============================================================
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === l);
+  });
+  // Abandon running game on language change
+  if (document.getElementById('game-screen').classList.contains('active')) {
+    clearInterval(timerInterval);
+    showScreen('start-screen');
+  }
+  // Re-render cheatsheet if visible
+  if (document.getElementById('cheat-screen').classList.contains('active')) {
+    renderCheatsheet();
+  }
+  updateUIText();
+}
+
+function abandonGame() {
+  clearInterval(timerInterval);
+  showScreen('start-screen');
+}
+
+function selectGameType(type) {
+  gameType = type;
+  document.querySelectorAll('.game-type-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.type === type);
+  });
+  updateModeToggle();
+}
+
+function selectMode(mode) {
+  gameMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+}
+
+function updateModeToggle() {
+  const t = UI[lang];
+  const counts = COUNTS[gameType];
+  const limitedCount = counts.limited;
+  const allCount = counts.all;
+
+  document.getElementById('mode-limited-btn').textContent = String(limitedCount);
+  document.getElementById('mode-all-btn').textContent = `${t.modeAll} (${allCount})`;
+  document.getElementById('mode-label').textContent = t.modeLabel;
+
+  // If limited === all, hide mode toggle (no choice to make)
+  const row = document.querySelector('.mode-toggle-row');
+  if (counts.limited === counts.all) {
+    row.style.display = 'none';
+    gameMode = 'all';
+  } else {
+    row.style.display = 'flex';
+  }
+}
+
+function updateUIText() {
+  const t = UI[lang];
+  document.getElementById('start-title').textContent = t.startTitle;
+  document.getElementById('start-desc').textContent = t.startDesc;
+  document.getElementById('start-btn').textContent = t.startBtn;
+  document.getElementById('type-mixed-name').textContent = t.typeMixedName;
+  document.getElementById('type-mixed-detail').textContent = t.typeMixedDetail;
+  document.getElementById('type-alpha-name').textContent = t.typeAlphaName;
+  document.getElementById('type-alpha-detail').textContent = t.typeAlphaDetail;
+  document.getElementById('type-nump-name').textContent = t.typeNumpName;
+  document.getElementById('type-nump-detail').textContent = t.typeNumpDetail;
+  document.getElementById('q-prompt').textContent = t.prompt;
+  document.getElementById('results-title').textContent = t.resultsTitle;
+  document.getElementById('stat-time-label').textContent = t.totalTime;
+  document.getElementById('stat-avg-label').textContent = t.avgTime;
+  document.getElementById('stat-correct-label').textContent = t.correct;
+  document.getElementById('stat-wrong-label').textContent = t.wrong;
+  document.getElementById('errors-title').textContent = t.errorsTitle;
+  document.getElementById('restart-btn').textContent = t.restart;
+  document.getElementById('stop-btn').title = t.stop;
+  document.getElementById('cheat-btn').textContent = t.cheatBtn;
+  document.getElementById('cheat-title').textContent = t.cheatTitle;
+  document.getElementById('cheat-letters-title').textContent = t.cheatLetters;
+  document.getElementById('cheat-digits-title').textContent = t.cheatDigits;
+  document.getElementById('cheat-punct-title').textContent = t.cheatPunct;
+  updateModeToggle();
+}
+
+function showCheatsheet() {
+  renderCheatsheet();
+  showScreen('cheat-screen');
+}
+
+function renderCheatsheet() {
+  // Letters
+  const lettersEl = document.getElementById('cheat-letters');
+  lettersEl.innerHTML = '';
+  for (const [char, vals] of Object.entries(DATA.letters)) {
+    lettersEl.innerHTML += `<div class="cheat-row"><div class="cheat-char">${char}</div><div class="cheat-word">${vals[lang]}</div></div>`;
+  }
+  // Digits
+  const digitsEl = document.getElementById('cheat-digits');
+  digitsEl.innerHTML = '';
+  for (const [char, vals] of Object.entries(DATA.digits)) {
+    digitsEl.innerHTML += `<div class="cheat-row"><div class="cheat-char">${char}</div><div class="cheat-word">${vals[lang]}</div></div>`;
+  }
+  // Punctuation
+  const punctEl = document.getElementById('cheat-punct');
+  punctEl.innerHTML = '';
+  for (const [char, vals] of Object.entries(DATA.punctuation)) {
+    const label = vals.label ? vals.label[lang] : '';
+    const display = label ? `${vals[lang]} <span style="color:var(--navy-light);font-weight:400;font-size:0.85em">(${label})</span>` : vals[lang];
+    punctEl.innerHTML += `<div class="cheat-row"><div class="cheat-char">${char}</div><div class="cheat-word">${display}</div></div>`;
+  }
+}
+
+// ============================================================
+// GAME LOGIC
+// ============================================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickDistractors(category, key, correctAnswer) {
+  const pool = DISTRACTORS[category][lang][key];
+  let candidates;
+  if (Array.isArray(pool)) {
+    candidates = pool;
+  } else {
+    candidates = pool.pool;
+  }
+  // Filter out anything matching the correct answer
+  candidates = candidates.filter(d => d.toUpperCase() !== correctAnswer.toUpperCase());
+  return shuffle(candidates).slice(0, 4);
+}
+
+function generateQuestions() {
+  const pool = [];
+
+  if (gameType === 'mixed' || gameType === 'alphabet') {
+    for (const [char, vals] of Object.entries(DATA.letters)) {
+      pool.push({ char, answer: vals[lang], type: 'letter', category: 'letters' });
+    }
+  }
+  if (gameType === 'mixed' || gameType === 'numspunct') {
+    for (const [char, vals] of Object.entries(DATA.digits)) {
+      pool.push({ char, answer: vals[lang], type: 'digit', category: 'digits' });
+    }
+    for (const [char, vals] of Object.entries(DATA.punctuation)) {
+      pool.push({ char, answer: vals[lang], type: 'punct', category: 'punctuation' });
+    }
+  }
+
+  const limit = COUNTS[gameType][gameMode];
+  const selected = shuffle(pool).slice(0, limit);
+
+  return selected.map(q => {
+    const distractors = pickDistractors(q.category, q.char, q.answer);
+    const options = shuffle([q.answer, ...distractors]);
+    return { ...q, options };
+  });
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startGame() {
+  questions = generateQuestions();
+  totalQuestions = questions.length;
+  currentQ = 0;
+  score = 0;
+  errors = [];
+  startTime = Date.now();
+  showScreen('game-screen');
+  startTimer();
+  renderQuestion();
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const m = Math.floor(elapsed / 60);
+    const s = elapsed % 60;
+    document.getElementById('timer-text').textContent = `${m}:${String(s).padStart(2, '0')}`;
+  }, 250);
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  const t = UI[lang];
+
+  document.getElementById('progress-text').textContent = `${currentQ + 1} / ${totalQuestions}`;
+  document.getElementById('progress-fill').style.width = `${((currentQ) / totalQuestions) * 100}%`;
+
+  document.getElementById('q-prompt').textContent = t.prompt;
+  document.getElementById('q-char').textContent = q.char;
+
+
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.onclick = () => handleAnswer(opt, q, container);
+    container.appendChild(btn);
+  });
+}
+
+function handleAnswer(selected, q, container) {
+  const buttons = container.querySelectorAll('.option-btn');
+  const isCorrect = selected === q.answer;
+
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent === q.answer) {
+      btn.classList.add('correct');
+    } else if (btn.textContent === selected && !isCorrect) {
+      btn.classList.add('wrong');
+    } else {
+      btn.classList.add('dimmed');
+    }
+  });
+
+  if (isCorrect) {
+    score++;
+  } else {
+    errors.push({ char: q.char, selected, correct: q.answer, type: q.type });
+  }
+
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < totalQuestions) {
+      renderQuestion();
+    } else {
+      endGame();
+    }
+  }, 600);
+}
+
+function endGame() {
+  clearInterval(timerInterval);
+  const totalMs = Date.now() - startTime;
+  const totalSec = totalMs / 1000;
+  const avgSec = totalSec / totalQuestions;
+
+  const m = Math.floor(totalSec / 60);
+  const s = Math.floor(totalSec % 60);
+
+  showScreen('results-screen');
+  updateUIText();
+
+  document.getElementById('score-display').innerHTML = `${score} <span>/ ${totalQuestions}</span>`;
+  document.getElementById('stat-time').textContent = `${m}:${String(s).padStart(2, '0')}`;
+  document.getElementById('stat-avg').textContent = `${avgSec.toFixed(1)}s`;
+  document.getElementById('stat-correct').textContent = score;
+  document.getElementById('stat-wrong').textContent = totalQuestions - score;
+
+  const errSection = document.getElementById('errors-section');
+  const errList = document.getElementById('errors-list');
+  errList.innerHTML = '';
+
+  if (errors.length > 0) {
+    errSection.style.display = 'block';
+    errors.forEach(e => {
+      const row = document.createElement('div');
+      row.className = 'error-row';
+      row.innerHTML = `
+        <div class="error-char">${e.char}</div>
+        <div class="error-details">
+          <span class="error-your">${e.selected}</span>
+          <span class="error-arrow">\u2192</span>
+          <span class="error-correct">${e.correct}</span>
+        </div>
+      `;
+      errList.appendChild(row);
+    });
+  } else {
+    errSection.style.display = 'none';
+  }
+
+  // Animate progress to 100%
+  document.getElementById('progress-fill').style.width = '100%';
+}
+
+// Init
+updateUIText();
+</script>
+</body>
+</html>
